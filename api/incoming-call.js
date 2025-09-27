@@ -1,17 +1,20 @@
-export default async function handler(req, res) {
+// api/incoming-call.js
+export default function handler(req, res) {
   if (req.method === "POST") {
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-      <Response>
-        <Connect>
-          <Stream url="wss://api.elevenlabs.io/v1/convai/stream"
-                  name="ElevenLabsAgent"
-                  />
-        </Connect>
-      </Response>`;
+    try {
+      // Example: simple TwiML response to say something
+      const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+          <Say voice="alice">Hello! Averiq AI Voice Agent is answering your call.</Say>
+        </Response>`;
 
-    res.setHeader("Content-Type", "text/xml");
-    res.status(200).send(twiml);
+      res.setHeader("Content-Type", "text/xml");
+      return res.status(200).send(twiml);
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
   } else {
-    res.status(405).json({ error: "Method Not Allowed" });
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 }

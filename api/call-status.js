@@ -1,36 +1,21 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_KEY
-);
-
-export default async function handler(req, res) {
+// api/call-status.js
+export default function handler(req, res) {
   if (req.method === "POST") {
     try {
-      const { CallSid, CallStatus, From, To, Duration } = req.body;
+      const { CallSid, CallStatus, From, To } = req.body || {};
 
-      const { error } = await supabase.from("calls").insert([
-        {
-          sid: CallSid,
-          status: CallStatus,
-          phone: From,
-          to_number: To,
-          duration: Duration || 0,
-        },
-      ]);
+      console.log("📞 Call Status Update:", { CallSid, CallStatus, From, To });
 
-      if (error) {
-        console.error("Supabase insert error:", error);
-        return res.status(500).json({ error: "Database insert failed" });
-      }
-
-      return res.status(200).json({ success: true });
+      return res.status(200).json({
+        success: true,
+        message: "Status received",
+        data: { CallSid, CallStatus, From, To },
+      });
     } catch (err) {
-      console.error("Error:", err);
-      return res.status(500).json({ error: "Server error" });
+      return res.status(500).json({ error: err.message });
     }
   } else {
-    res.status(405).json({ error: "Method Not Allowed" });
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 }
